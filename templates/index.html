@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muziek Bingo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            height: 100vh;
+            display: grid;
+            gap: 10px;
+        }
+
+        .title-image {
+            grid-column: 1 / span 2;
+            grid-row: 1;
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            margin: 0 auto;
+        }
+        
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto auto;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .turntable-section {
+            grid-column: 1;
+            grid-row: 2;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .album-cover {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            z-index: 2;
+            margin-left: -60px;
+        }
+
+        .album-cover img, .album-cover p {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 1.0;
+            background-image: url('/static/background/record-background.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .right-section {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }   
+
+        .rotating {
+            animation: spin 5s linear infinite;
+        }
+
+        .grid-section {
+            flex: 1;
+        }
+
+        .song-info {
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            place-items: center;
+            font-size: x-large;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            flex-grow: 1;
+            font-size: large;
+        }
+
+        .grid-item {
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            text-align: center;
+            overflow-wrap: break-word;
+            padding: 5px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            min-width: 75px;
+            min-height: 50px;
+        }
+
+        .number-info-box {
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: left;
+            box-sizing: border-box;
+        }
+
+        .buttons-section {
+            grid-column: 1 / span 2;
+            grid-row: 3;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #0000ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            font-size: larger;
+        }
+
+        button:hover {
+            background-color: #0000cc;
+        }
+
+        /* Carousel Grid Styles */
+        .carousel-section {
+            grid-column: 1 / span 2;
+            grid-row: 4;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .carousel-frame {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 10px;
+            padding: 10px;
+            min-width: min-content;
+        }
+
+        .carousel-item {
+            flex: 0 0 100px;  /* Fixed width, no growing/shrinking */
+            text-align: center;
+/*            padding: 10px;*/
+            border-radius: 5px;
+            background-color: #f1f1f1;
+            transition: background-color 0.3s ease;
+            opacity: 1.0;
+        }
+
+        .carousel-item img {
+            width: 100px;
+            height: 100px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+
+        .carousel-item.highlight-yellow {
+            background-color: yellow;
+        }
+
+        .carousel-item.highlight-green {
+            background-color: green;
+            opacity: 1;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <img src="/static/background/title-background.png" alt="Muziek Bingo" class="title-image">        
+        <div class="turntable-section">
+            <div class="background-image"></div>
+            <div class="album-cover" id="album-container">
+                <p>No song selected yet!</p>
+            </div>
+        </div>
+        
+        <div class="right-section">
+            <div class="song-info" id="song-info">
+                Getrokken nummers:
+            </div>
+            <div class="grid-container" id="song-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    
+        <div class="buttons-section">
+            <button id="random-button">Kies een nummer</button>
+            <button id="reset-button">Reset bingo kaart</button>
+        </div>
+    
+        <div class="carousel-section">
+            <div class="carousel-frame" id="carousel-frame">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const albumContainer = document.getElementById("album-container");
+        const songGrid = document.getElementById("song-grid");
+        const songInfo = document.getElementById("song-info");
+        const randomButton = document.getElementById("random-button");
+        const resetButton = document.getElementById("reset-button");
+        const carouselFrame = document.getElementById("carousel-frame");
+
+        let availableSongs = [];
+        let selectedSong = null;
+        let animating = false;  // Prevents multiple simultaneous animations
+        let lastSelectedIndex = 0;
+
+        function addSongToGrid(songTitle) {
+            const cells = songGrid.getElementsByClassName("grid-item");
+            for (const cell of cells) {
+                if (cell.textContent.trim() === "") {
+                    cell.textContent = songTitle;
+                    break;
+                }
+            }
+        }
+
+        function resetGrid() {
+            const cells = songGrid.getElementsByClassName("grid-item");
+            for (const cell of cells) {
+                cell.textContent = "";
+            }
+        }
+
+        // Function to update the carousel with available songs
+        function updateCarousel() {
+            // Fetch the available songs from the backend
+            fetch("/available_songs")
+                .then(response => response.json())
+                .then(availableSongs => {
+                    carouselFrame.innerHTML = "";  // Clear existing items
+
+                    availableSongs.forEach(song => {
+                        const item = document.createElement("div");
+                        item.classList.add("carousel-item");
+
+                        const img = document.createElement("img");
+                        const albumImageUrl = `/static/albums/${song.image}`;
+
+                        img.onerror = () => {
+                            img.src = createPlaceholderImage(song.title, 100, 10);
+                        };
+
+                        img.src = albumImageUrl
+                        img.alt = song.title;
+
+                        const title = document.createElement("p");
+                        title.textContent = song.title;
+
+                        item.appendChild(img);
+                        item.appendChild(title);
+                        carouselFrame.appendChild(item);
+                    });
+                })
+                .catch(error => console.error("Error fetching available songs:", error));
+        }
+
+        // Function to animate the carousel
+        function animateCarousel(selectedIndex, onComplete) {
+            if (animating) return;
+            animating = true;
+
+            const carouselWidgets = carouselFrame.querySelectorAll(".carousel-item");
+            if (!carouselWidgets.length) {
+                animating = false;
+                onComplete();
+                return;
+            }
+
+            const totalDuration = 4000; // 4 seconds animation
+            const numSongs = carouselWidgets.length;
+            let currentIndex = lastSelectedIndex; // Start from last position
+            const startTime = Date.now();
+
+            function stepAnimation() {
+                const elapsed = Date.now() - startTime;
+                
+                if (elapsed >= totalDuration && currentIndex === selectedIndex) {
+                    // Ensure final position matches selected index
+                    carouselWidgets.forEach(widget => widget.classList.remove("highlight-yellow"));
+                    carouselWidgets[selectedIndex].classList.add("highlight-green");
+                    lastSelectedIndex = selectedIndex; // Update last selected position
+                    animating = false;
+                    setTimeout(onComplete, 1000);
+                    return;
+                }
+
+                // Calculate remaining steps to reach target
+                const distanceToTarget = (selectedIndex - currentIndex + numSongs) % numSongs;
+                const progress = elapsed / totalDuration;
+
+                // Three-phase speed control
+                let delay;
+                if (progress < 0.5) {
+                    // Phase 1: Fast cycling (50ms delay)
+                    delay = 50;
+                } else if (progress < 0.875) {
+                    // Phase 2: Gradual slowdown
+                    const slowdownProgress = (progress - 0.5) / 0.375;
+                    delay = 50 + (slowdownProgress * 150);
+                } else {
+                    // Phase 3: Final approach
+                    // Ensure we land on target
+                    const remainingTime = totalDuration - elapsed;
+                    delay = remainingTime / (distanceToTarget || 1);
+                }
+
+                // Update highlight
+                carouselWidgets.forEach(widget => widget.classList.remove("highlight-yellow"));
+                carouselWidgets[currentIndex].classList.add("highlight-yellow");
+
+                // Move to next position
+                currentIndex = (currentIndex + 1) % numSongs;
+                
+                // Schedule next step
+                setTimeout(stepAnimation, delay);
+            }
+
+            stepAnimation();
+        }
+
+
+
+        function createPlaceholderImage(text, sizeEllipse, sizeFont) {
+            const canvas = document.createElement("canvas");
+            canvas.width = sizeEllipse;
+            canvas.height = sizeEllipse;
+            const ctx = canvas.getContext("2d");
+            
+            // Calculate usable radius (accounting for border)
+            const borderThickness = 10;
+            const radius = (sizeEllipse - borderThickness) / 2;
+            const maxWidth = radius * 1.4; // 70% of diameter for safe text area
+            
+            // Draw circle
+            ctx.beginPath();
+            ctx.arc(
+                sizeEllipse / 2,
+                sizeEllipse / 2,
+                radius,
+                0,
+                2 * Math.PI
+            );
+            
+            // Fill and stroke
+            ctx.fillStyle = "white";
+            ctx.fill();
+            ctx.lineWidth = borderThickness;
+            ctx.strokeStyle = "black";
+            ctx.stroke();
+            
+            // Text rendering
+            let words = text.split(' ');
+            let lines = [];
+            let currentLine = words[0];
+            
+            // Set initial font
+            ctx.font = `${sizeFont}px sans-serif`;
+            ctx.fillStyle = "black";
+            ctx.textAlign = "center";
+            
+            // Create word-wrapped lines
+            for(let i = 1; i < words.length; i++) {
+                let testLine = currentLine + ' ' + words[i];
+                let metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth) {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            lines.push(currentLine);
+            
+            // Calculate vertical positioning
+            const lineHeight = sizeFont * 1.2;
+            const totalHeight = lineHeight * lines.length;
+            let startY = (sizeEllipse - totalHeight) / 2 + lineHeight;
+            
+            // Draw lines
+            lines.forEach((line, i) => {
+                ctx.fillText(line, sizeEllipse / 2, startY + (i * lineHeight));
+            });
+            
+            return canvas.toDataURL();
+        }
+
+        // Function to initialize the album container with a placeholder
+        function initializePlaceholder() {
+            const albumContainer = document.getElementById("album-container");
+            const songInfo = document.getElementById("song-info");
+
+            const placeholderImage = createPlaceholderImage("Nog geen nummer getrokken", 200, 12);
+
+            // Set the placeholder image and text
+            albumContainer.innerHTML = `<img src="${placeholderImage}" alt="Placeholder">`;
+            songInfo.innerHTML = "<h2>Nog geen nummer getrokken</h2>";
+        }
+
+        // Handle random button click
+        randomButton.addEventListener("click", () => {
+            fetch("/random_song", { method: "POST" })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        const song = data.song;
+                        const albumImageUrl = `/static/albums/${song.image}`;
+
+                        selectedSong = song;  // Store the selected song
+
+                        console.log("Available songs:", data.available_songs);  // Debugging
+                        availableSongs = data.available_songs;  // Update available songs from the backend response
+                        const selectedIndex = availableSongs.findIndex(s => s.title === selectedSong.title);
+                        console.log("Selected song:", selectedSong.title);
+                        console.log("Selected index:", selectedIndex);
+                        // Start the highlight animation
+                        animateCarousel(selectedIndex, () => {
+                            // Once animation is complete, show the album cover
+                            const image = new Image();
+                            image.onload = () => {
+                                albumContainer.innerHTML = `<img class="rotating" src="${albumImageUrl}" alt="${song.title}">`;
+                            };
+                            image.onerror = () => {
+                                // Generate placeholder image if the album image is missing
+                                const placeholderImage = createPlaceholderImage(song.title, 200, 20);
+                                albumContainer.innerHTML = `<img class="rotating" src="${placeholderImage}" alt="${song.title}">`;
+                            };
+
+                            // Try to load the album image
+                            image.src = albumImageUrl;
+
+                            songInfo.innerHTML = `<h2>${song.artist} - ${song.title}</h2>`;
+                            addSongToGrid(`${song.title}`);
+                            availableSongs = data.available_songs;  // Update available songs from the backend response
+                            updateCarousel();
+                        });
+
+                    } else {
+                        albumContainer.innerHTML = `<p>${data.message}</p>`;
+                    }
+                });
+        });
+
+        // Handle reset button click
+        resetButton.addEventListener("click", () => {
+            fetch("/reset", { method: "POST" })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        alert(data.message);
+                        albumContainer.innerHTML = `<p></p>`;
+                        songInfo.innerHTML = `<h2>Getrokken nummers:</h2>`;
+                        resetGrid();
+                        updateCarousel();
+                    } else {
+                        alert("Failed to reset songs.");
+                    }
+                });
+        });
+
+        // Call the function to initialize the placeholder when the app starts
+        document.addEventListener("DOMContentLoaded", () => {
+            initializePlaceholder();
+        });
+
+        // Initialize empty grid
+        for (let i = 0; i < 50; i++) {
+            const div = document.createElement("div");
+            div.className = "grid-item";
+            songGrid.appendChild(div);
+        }
+
+        // Update the carousel with available songs
+        updateCarousel();
+    </script>
+</body>
+</html>
