@@ -165,15 +165,20 @@
         .carousel-frame {
             display: flex;
             flex-wrap: nowrap;
-            gap: 10px;
+            gap: 9px;
             padding: 10px;
             min-width: min-content;
+            text-align: center;     
+            overflow: hidden; /* Hide scrollbars */            
+            position: relative;                   
         }
 
         .carousel-item {
             flex: 0 0 100px;  /* Fixed width, no growing/shrinking */
             text-align: center;
 /*            padding: 10px;*/
+            border: 2px solid #f1f1f1;
+            height: 190px;
             border-radius: 5px;
             background-color: #f1f1f1;
             transition: background-color 0.3s ease;
@@ -189,11 +194,14 @@
 
         .carousel-item.highlight-yellow {
             background-color: yellow;
+            border: 2px solid yellow;
+            transition: border 0.2s;
         }
 
         .carousel-item.highlight-green {
-            background-color: green;
-            opacity: 1;
+            background-color: green;            
+            border: 2px solid green;
+            transition: border 0.2s;
         }
 
         @keyframes spin {
@@ -246,10 +254,14 @@
         const resetButton = document.getElementById("reset-button");
         const carouselFrame = document.getElementById("carousel-frame");
 
+        const albumImageCache = {};
+        const placeholderCache = {};
+        
         let availableSongs = [];
         let selectedSong = null;
         let animating = false;  // Prevents multiple simultaneous animations
         let lastSelectedIndex = 0;
+        let availableSongsCache = [];
 
         function addSongToGrid(songTitle) {
             const cells = songGrid.getElementsByClassName("grid-item");
@@ -268,43 +280,84 @@
             }
         }
 
+        // Function to update the carousel image
+        function updateWidgetImage(img, song) {
+            const imgSrcKey = `/static/albums/${song.image}`;
+
+            // Check if the album image is already cached
+            if (albumImageCache[imgSrcKey]) {
+                // Use the cached image if available
+                img.src = albumImageCache[imgSrcKey];
+            } else {
+                // Load the image if not cached
+                const image = new Image();
+                image.src = imgSrcKey;
+                
+                image.onload = () => {
+                    // Cache the image once loaded
+                    albumImageCache[imgSrcKey] = image.src;
+                    img.src = image.src;
+                };
+
+                image.onerror = () => {
+                    // If the image fails to load, use the placeholder
+                    img.src = createPlaceholderImage(song.title, 100, 10);
+                };
+            }
+        }
+
         // Function to update the carousel with available songs
         function updateCarousel() {
-            // Fetch the available songs from the backend
             fetch("/available_songs")
-                .then(response => response.json())
-                .then(availableSongs => {
-                    carouselFrame.innerHTML = "";  // Clear existing items
+                .then((response) => response.json())
+                .then((availableSongs) => {
+                    carouselFrame.innerHTML = ""; // Clear any existing content
+                    const numWidgets = 22; // Fixed number of widgets
+                    const middleIndex = Math.floor(numWidgets / 2); // Middle widget index
 
-                    availableSongs.forEach(song => {
+                    for (let i = 0; i < numWidgets; i++) {
                         const item = document.createElement("div");
                         item.classList.add("carousel-item");
 
+                        if (i === middleIndex) {
+                            item.classList.add("highlight-yellow"); // Highlight the middle widget
+                        }
+
                         const img = document.createElement("img");
-                        const albumImageUrl = `/static/albums/${song.image}`;
+                        const songIndex = (availableSongs.length + i - middleIndex) % availableSongs.length; // Circular indexing
+                        const albumImageUrl = `/static/albums/${availableSongs[songIndex].image}`;
 
                         img.onerror = () => {
-                            img.src = createPlaceholderImage(song.title, 100, 10);
+                            img.src = createPlaceholderImage(
+                                availableSongs[songIndex].title,
+                                100,
+                                10
+                            );
                         };
-
-                        img.src = albumImageUrl
-                        img.alt = song.title;
+                        img.src = albumImageUrl;
+                        img.alt = availableSongs[songIndex].title;
 
                         const title = document.createElement("p");
-                        title.textContent = song.title;
+                        title.textContent = availableSongs[songIndex].title;
 
                         item.appendChild(img);
                         item.appendChild(title);
                         carouselFrame.appendChild(item);
-                    });
+                    }
+
+                    availableSongsCache = availableSongs; // Cache for animation
                 })
-                .catch(error => console.error("Error fetching available songs:", error));
+                .catch((error) => console.error("Error fetching available songs:", error));
         }
 
         // Function to animate the carousel
-        function animateCarousel(selectedIndex, onComplete) {
-            if (animating) return;
+        function animateCarousel(direction, selectedIndex, onComplete) {
+            if (animating) return; // Prevent overlapping animations
             animating = true;
+
+            const numWidgets = 22; // Fixed number of visible widgets
+            const middleIndex = Math.floor(numWidgets / 2); // Middle widget index
+            const totalSongs = availableSongsCache.length;
 
             const carouselWidgets = carouselFrame.querySelectorAll(".carousel-item");
             if (!carouselWidgets.length) {
@@ -313,100 +366,115 @@
                 return;
             }
 
-            const totalDuration = 4000; // 4 seconds animation
-            const numSongs = carouselWidgets.length;
-            let currentIndex = lastSelectedIndex; // Start from last position
-            const startTime = Date.now();
+            let currentMiddleIndex = parseInt(carouselWidgets[middleIndex].dataset.songIndex, 10) || 0;
 
-            function stepAnimation() {
-                const elapsed = Date.now() - startTime;
-                
-                if (elapsed >= totalDuration && currentIndex === selectedIndex) {
-                    // Ensure final position matches selected index
-                    carouselWidgets.forEach(widget => widget.classList.remove("highlight-yellow"));
-                    carouselWidgets[selectedIndex].classList.add("highlight-green");
-                    lastSelectedIndex = selectedIndex; // Update last selected position
+            const startTime = performance.now();
+            const animationDuration = 5000; // Total animation duration (5 seconds)
+            const constantSpeedDuration = 3000; // Constant speed for first 3 seconds
+            const slowingDownDuration = animationDuration - constantSpeedDuration;
+
+            const updateContent = () => {
+                const elapsedTime = performance.now() - startTime;
+                const distanceToTarget = Math.abs((selectedIndex - currentMiddleIndex + totalSongs) % totalSongs);
+
+                let step = 1; // Default step size (constant)
+
+                if (elapsedTime >= constantSpeedDuration) {
+                    // Slow down after 3 seconds
+                    const timeLeft = animationDuration - elapsedTime;
+                    const slowDownFactor = Math.max(timeLeft / slowingDownDuration, 0.1); // Minimum slowdown factor
+                    step = Math.ceil(distanceToTarget * slowDownFactor);
+                }
+
+                // Update the middle widget
+                currentMiddleIndex = (currentMiddleIndex + direction + totalSongs) % totalSongs;
+
+                // Update widgets
+                carouselWidgets.forEach((widget, index) => {
+                    const songIndex = (currentMiddleIndex + index - middleIndex + totalSongs) % totalSongs;
+                    const song = availableSongsCache[songIndex];
+
+                    const img = widget.querySelector("img");
+
+                    // Update the image for this widget
+                    updateWidgetImage(img, song);
+
+                    const title = widget.querySelector("p");
+                    title.textContent = song.title;
+
+                    widget.dataset.songIndex = songIndex;
+
+                    // Highlight the middle widget
+                    if (index === middleIndex) {
+                        if (songIndex === selectedIndex) {
+                            widget.classList.add("highlight-green");
+                            widget.classList.remove("highlight-yellow");
+                        } else {
+                            widget.classList.add("highlight-yellow");
+                            widget.classList.remove("highlight-green");
+                        }
+                    } else {
+                        widget.classList.remove("highlight-yellow", "highlight-green");
+                    }
+                });
+
+                // Ensure that animation continues until the content is correctly set
+                if (carouselWidgets[middleIndex].dataset.songIndex == selectedIndex) {
                     animating = false;
-                    setTimeout(onComplete, 1000);
+                    onComplete();
                     return;
                 }
 
-                // Calculate remaining steps to reach target
-                const distanceToTarget = (selectedIndex - currentIndex + numSongs) % numSongs;
-                const progress = elapsed / totalDuration;
+                // Continue the animation
+                setTimeout(updateContent, 50); // Update widgets in intervals
+            };
 
-                // Three-phase speed control
-                let delay;
-                if (progress < 0.5) {
-                    // Phase 1: Fast cycling (50ms delay)
-                    delay = 50;
-                } else if (progress < 0.875) {
-                    // Phase 2: Gradual slowdown
-                    const slowdownProgress = (progress - 0.5) / 0.375;
-                    delay = 50 + (slowdownProgress * 150);
-                } else {
-                    // Phase 3: Final approach
-                    // Ensure we land on target
-                    const remainingTime = totalDuration - elapsed;
-                    delay = remainingTime / (distanceToTarget || 1);
-                }
-
-                // Update highlight
-                carouselWidgets.forEach(widget => widget.classList.remove("highlight-yellow"));
-                carouselWidgets[currentIndex].classList.add("highlight-yellow");
-
-                // Move to next position
-                currentIndex = (currentIndex + 1) % numSongs;
-                
-                // Schedule next step
-                setTimeout(stepAnimation, delay);
-            }
-
-            stepAnimation();
+            updateContent();
         }
 
 
 
+
         function createPlaceholderImage(text, sizeEllipse, sizeFont) {
+            const cacheKey = `${text}-${sizeEllipse}x${sizeFont}`;
+            // If the image is already cached, return it
+            if (placeholderCache[cacheKey]) {
+                return placeholderCache[cacheKey];
+            }
+
             const canvas = document.createElement("canvas");
             canvas.width = sizeEllipse;
             canvas.height = sizeEllipse;
             const ctx = canvas.getContext("2d");
-            
+
             // Calculate usable radius (accounting for border)
             const borderThickness = 10;
             const radius = (sizeEllipse - borderThickness) / 2;
             const maxWidth = radius * 1.4; // 70% of diameter for safe text area
-            
+
             // Draw circle
             ctx.beginPath();
-            ctx.arc(
-                sizeEllipse / 2,
-                sizeEllipse / 2,
-                radius,
-                0,
-                2 * Math.PI
-            );
-            
+            ctx.arc(sizeEllipse / 2, sizeEllipse / 2, radius, 0, 2 * Math.PI);
+
             // Fill and stroke
             ctx.fillStyle = "white";
             ctx.fill();
             ctx.lineWidth = borderThickness;
             ctx.strokeStyle = "black";
             ctx.stroke();
-            
+
             // Text rendering
             let words = text.split(' ');
             let lines = [];
             let currentLine = words[0];
-            
+
             // Set initial font
             ctx.font = `${sizeFont}px sans-serif`;
             ctx.fillStyle = "black";
             ctx.textAlign = "center";
-            
+
             // Create word-wrapped lines
-            for(let i = 1; i < words.length; i++) {
+            for (let i = 1; i < words.length; i++) {
                 let testLine = currentLine + ' ' + words[i];
                 let metrics = ctx.measureText(testLine);
                 if (metrics.width > maxWidth) {
@@ -417,18 +485,21 @@
                 }
             }
             lines.push(currentLine);
-            
+
             // Calculate vertical positioning
             const lineHeight = sizeFont * 1.2;
             const totalHeight = lineHeight * lines.length;
             let startY = (sizeEllipse - totalHeight) / 2 + lineHeight;
-            
+
             // Draw lines
             lines.forEach((line, i) => {
                 ctx.fillText(line, sizeEllipse / 2, startY + (i * lineHeight));
             });
-            
-            return canvas.toDataURL();
+
+            // Cache the generated placeholder image
+            const dataUrl = canvas.toDataURL();
+            placeholderCache[cacheKey] = dataUrl;
+            return dataUrl;
         }
 
         // Function to initialize the album container with a placeholder
@@ -460,7 +531,7 @@
                         console.log("Selected song:", selectedSong.title);
                         console.log("Selected index:", selectedIndex);
                         // Start the highlight animation
-                        animateCarousel(selectedIndex, () => {
+                        animateCarousel(1, selectedIndex, () => {
                             // Once animation is complete, show the album cover
                             const image = new Image();
                             image.onload = () => {
@@ -478,7 +549,7 @@
                             songInfo.innerHTML = `<h2>${song.artist} - ${song.title}</h2>`;
                             addSongToGrid(`${song.title}`);
                             availableSongs = data.available_songs;  // Update available songs from the backend response
-                            updateCarousel();
+                            //updateCarousel();
                         });
 
                     } else {
@@ -497,7 +568,7 @@
                         albumContainer.innerHTML = `<p></p>`;
                         songInfo.innerHTML = `<h2>Getrokken nummers:</h2>`;
                         resetGrid();
-                        updateCarousel();
+                        //updateCarousel();
                     } else {
                         alert("Failed to reset songs.");
                     }
