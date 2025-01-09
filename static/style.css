@@ -139,6 +139,11 @@
             display: flex;
             justify-content: center;
             gap: 20px;
+            position: relative;
+            z-index:1;
+            bottom:-100%;
+            margin-top:-3em;
+            margin-bottom: -3em;
         }
 
         .buttons {
@@ -154,6 +159,10 @@
             margin: 10px;
             cursor: pointer;
             font-size: larger;
+
+
+
+
         }
 
         button:hover {
@@ -170,7 +179,7 @@
         }
 
         .carousel-frame {
-            padding:4rem 0;
+            padding:6rem 0 1rem 0;
             display: flex;
             flex-wrap: nowrap;
             gap: 9px;
@@ -180,6 +189,7 @@
             position: relative;
             justify-content: center;
             align-items: center;
+            border-top: solid 1px #effefe;
         }
 
         .carousel-item {
@@ -230,3 +240,39 @@
                 transform: rotate(360deg);
             }
         }
+
+
+        /* CSS */
+.button-88 {
+  display: flex;
+  align-items: center;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 2em;
+  padding: 0.7em 1.4em 0.7em 1.1em;
+  color: white;
+  background: #ad5389;
+  background: linear-gradient(0deg, rgba(20,167,62,1) 0%, rgba(102,247,113,1) 100%);
+  border: none;
+  box-shadow: 0 0.7em 1.5em -0.5em #14a73e98;
+  letter-spacing: 0.05em;
+  border-radius: 20em;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-88:hover {
+  box-shadow: 0 0.5em 1.5em -0.5em #14a73e98;
+}
+
+.button-88:active {
+  box-shadow: 0 0.3em 1em -0.5em #14a73e98;
+}
+
+#reset-button{
+    position: absolute;
+    top:10px;
+    right:10px;
+}
