@@ -18,6 +18,7 @@
             const cells = songGrid.getElementsByClassName("grid-item");
             for (const cell of cells) {
                 if (cell.textContent.trim() === "") {
+                    cell.classList.add('is-filled');
                     cell.textContent = songTitle;
                     break;
                 }
