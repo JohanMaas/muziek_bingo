@@ -1,6 +1,10 @@
 # Music Bingo Game
 
-An interactive music bingo web application built with Flask. Players can generate random songs from different decades and mark them on their bingo cards.
+An interactive music bingo web application built with Flask and Javascript. 
+
+The Music Bingo application randomly selects songs from a curated playlist, displaying their album art, title, and artist on screen. 
+Players listen to the music and mark the corresponding song on their bingo cards. 
+The app ensures each song is chosen only once and supports dynamic visuals, such as rotating album covers, for an engaging experience.
 
 ## Features
 
