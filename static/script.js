@@ -58,12 +58,12 @@
         }
 
         // Function to update the carousel with available songs
-        function updateCarousel() {
-            fetch("/available_songs")
+        async function updateCarousel() {
+            await fetch("/available_songs")
                 .then((response) => response.json())
                 .then((availableSongs) => {
                     carouselFrame.innerHTML = ""; // Clear any existing content
-                    const numWidgets = 22; // Fixed number of widgets
+                    const numWidgets = 22 ||availableSongs.length; // Fixed number of widgets
                     const middleIndex = Math.floor(numWidgets / 2); // Middle widget index
 
                     for (let i = 0; i < numWidgets; i++) {
@@ -102,11 +102,11 @@
         }
 
         // Function to animate the carousel
-        function animateCarousel(direction, selectedIndex, onComplete) {
+        async function animateCarousel(direction, selectedIndex, onComplete) {
             if (animating) return; // Prevent overlapping animations
             animating = true;
 
-            const numWidgets = 22; // Fixed number of visible widgets
+            const numWidgets = 22 || availableSongsCache.length; // Fixed number of visible widgets
             const middleIndex = Math.floor(numWidgets / 2); // Middle widget index
             const totalSongs = availableSongsCache.length;
 
@@ -270,24 +270,34 @@
         }
 
         // Handle random button click
-        randomButton.addEventListener("click", () => {
-            fetch("/random_song", { method: "POST" })
+        randomButton.addEventListener("click", async() => {
+            let selectedIndex = 0
+              await updateCarousel();
+            await fetch("/random_song", { method: "POST" })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === "success") {
                         const song = data.song;
-                        const albumImageUrl = `/static/albums/${song.image}`;
+
 
                         selectedSong = song;  // Store the selected song
 
                         console.log("Available songs:", data.available_songs);  // Debugging
                         availableSongs = data.available_songs;  // Update available songs from the backend response
-                        const selectedIndex = availableSongs.findIndex(s => s.title === selectedSong.title);
+                        selectedIndex = availableSongs.findIndex(s => s.title === selectedSong.title);
                         console.log("Selected song:", selectedSong.title);
                         console.log("Selected index:", selectedIndex);
                         // Start the highlight animation
-                        animateCarousel(1, selectedIndex, () => {
+                         availableSongs = data.available_songs;
+                    } else {
+                        albumContainer.innerHTML = `<p>${data.message}</p>`;
+                    }
+                });
+
+                   let song = availableSongs[selectedIndex]
+                   animateCarousel(1, selectedIndex, () => {
                             // Once animation is complete, show the album cover
+                            const albumImageUrl = `/static/albums/${song.image}`;
                             const image = new Image();
                             image.onload = () => {
                                 albumContainer.innerHTML = `<img class="rotating" src="${albumImageUrl}" alt="${song.title}">`;
@@ -303,14 +313,10 @@
 
                             songInfo.innerHTML = `<h2>${song.artist} - ${song.title}</h2>`;
                             addSongToGrid(`${song.title}`);
-                            availableSongs = data.available_songs;  // Update available songs from the backend response
-                            //updateCarousel();
+                           // Update available songs from the backend response
+                            //
                         });
 
-                    } else {
-                        albumContainer.innerHTML = `<p>${data.message}</p>`;
-                    }
-                });
         });
 
         // Handle reset button click
@@ -350,12 +356,9 @@
 
 
  const scrollToMiddle = (el) => {
-         console.log('scrolling');
         const middlePosition = el.parentNode.scrollWidth / 2 - el.parentNode.clientWidth / 2;
         el.parentNode.scrollLeft = middlePosition;
 
-        console.log(middlePosition);
-        console.log( el);
     };
 
 // const carouselFrameEl = document.getElementById("carousel-frame");
