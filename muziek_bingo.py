@@ -2,6 +2,7 @@ from flask import Flask, jsonify, render_template, send_from_directory
 import random
 import json
 
+
 app = Flask(__name__)
 
 # Load songs from songs.json
