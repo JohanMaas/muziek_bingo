@@ -64,9 +64,17 @@
                 .then((response) => response.json())
                 .then((availableSongs) => {
                     carouselFrame.innerHTML = ""; // Clear any existing content
-                    const numWidgets = 22 ||availableSongs.length; // Fixed number of widgets
+
+                    // Calculate the number of widgets based on the screen size
+                    const carouselWidth = window.outerWidth;
+                    //console.log("carouselWidth: ", carouselFrame.clientWidth); // Debugging
+                    const widgetWidth = 170; // Adjust this value based on your widget width
+                    const numWidgets = Math.floor(carouselWidth / widgetWidth);
+
+                    //const numWidgets = 15 ||availableSongs.length; // Fixed number of widgets
                     const middleIndex = Math.floor(numWidgets / 2); // Middle widget index
 
+                    console.log("middleIndex: ", middleIndex); // Debugging
                     for (let i = 0; i < numWidgets; i++) {
                         const item = document.createElement("div");
                         item.classList.add("carousel-item");
@@ -107,7 +115,7 @@
             if (animating) return; // Prevent overlapping animations
             animating = true;
 
-            const numWidgets = 22 || availableSongsCache.length; // Fixed number of visible widgets
+            const numWidgets = 15 || availableSongsCache.length; // Fixed number of visible widgets
             const middleIndex = Math.floor(numWidgets / 2); // Middle widget index
             const totalSongs = availableSongsCache.length;
 
@@ -358,16 +366,23 @@
 
         // Handle reset button click
         resetButton.addEventListener("click", () => {
-        if (window.confirm('Reset alle nummers')){
+        if (window.confirm('Weet je zeker dat je de bingokaart wilt resetten?')) {
          fetch("/reset", { method: "POST" })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === "success") {
+                        // Stop the currently playing audio (if any)
+                        if (currentAudio) {
+                            currentAudio.pause();
+                            currentAudio = null;
+                        }
+                        // Reset the UI
                         alert(data.message);
                         albumContainer.innerHTML = `<p></p>`;
                         songInfo.innerHTML = `<h2>Getrokken nummers:</h2>`;
                         resetGrid();
-                        //updateCarousel();
+                        // Update the carousel with available songs
+                        updateCarousel();
                     } else {
                         alert("Failed to reset songs.");
                     }
@@ -378,7 +393,7 @@
 
         // Call the function to initialize the placeholder when the app starts
         document.addEventListener("DOMContentLoaded", () => {
-            initializePlaceholder();
+//            initializePlaceholder();
         });
 
         // Initialize empty grid
@@ -391,7 +406,6 @@
         // Update the carousel with available songs
         updateCarousel();
 
-
  const scrollToMiddle = (el) => {
         const middlePosition = el.parentNode.scrollWidth / 2 - el.parentNode.clientWidth / 2;
         el.parentNode.scrollLeft = middlePosition;
@@ -399,5 +413,5 @@
     };
 
 // const carouselFrameEl = document.getElementById("carousel-frame");
- scrollToMiddle(carouselFrame);
+ //scrollToMiddle(carouselFrame);
 
