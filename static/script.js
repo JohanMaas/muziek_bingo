@@ -263,17 +263,50 @@
             const albumContainer = document.getElementById("album-container");
             const songInfo = document.getElementById("song-info");
 
-            const placeholderImage = createPlaceholderImage("Nog geen nummer getrokken", 200, 12);
+//            const placeholderImage = createPlaceholderImage("Nog geen nummer getrokken", 200, 12);
 
             // Set the placeholder image and text
             albumContainer.innerHTML = `<img src="${placeholderImage}" alt="Placeholder">`;
             songInfo.innerHTML = "<h2>Nog geen nummer getrokken</h2>";
         }
 
+        let currentAudio = null; // Keep track of the currently playing audio
+
+        async function playPreview(trackId) {
+            const apiUrl = `http://127.0.0.1:5000/api/spotify-preview/${trackId}`;
+            
+            try {
+                // Stop the currently playing audio (if any)
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null; // Clear the reference
+                }
+        
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch preview URL: ${response.statusText}`);
+                }
+        
+                const data = await response.json();
+                const previewUrl = data.preview_url;
+        
+                if (previewUrl) {
+                    console.log("Playing preview URL:", previewUrl); // Log the preview URL
+                    currentAudio = new Audio(previewUrl);
+                    currentAudio.play().catch((error) => console.error("Error playing preview:", error));
+                } else {
+                    console.error("Preview URL not available for this track.");
+                }
+            } catch (error) {
+                console.error("Error fetching preview URL:", error);
+            }
+        }
+        
+    
         // Handle random button click
         randomButton.addEventListener("click", async() => {
             let selectedIndex = 0
-              await updateCarousel();
+            await updateCarousel();
             await fetch("/random_song", { method: "POST" })
                 .then(response => response.json())
                 .then(data => {
@@ -312,8 +345,10 @@
                             // Try to load the album image
                             image.src = albumImageUrl;
 
-                            songInfo.innerHTML = `<h2>${song.artist} - ${song.title}</h2>`;
+                            songInfo.innerHTML = `<h1>${song.artist} - ${song.title}</h1>`;
                             addSongToGrid(`${song.title}`);
+                            console.log("Selected song track: ", song.track_id);
+                            playPreview(song.track_id);
                            // Update available songs from the backend response
                             //
                         });

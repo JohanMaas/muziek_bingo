@@ -1,3 +1,7 @@
 .venv/
 .vscode*
 /.idea
+/static/albums/*
+/album_covers
+.cache
+venv/
