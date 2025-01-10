@@ -5,3 +5,4 @@
 /album_covers
 .cache
 venv/
+get_album_covers.py
