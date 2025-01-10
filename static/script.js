@@ -306,6 +306,7 @@
         // Handle random button click
         randomButton.addEventListener("click", async() => {
             let selectedIndex = 0
+            randomButton.disabled = true; // Disable the button during the animation
             await updateCarousel();
             await fetch("/random_song", { method: "POST" })
                 .then(response => response.json())
@@ -349,8 +350,8 @@
                             addSongToGrid(`${song.title}`);
                             console.log("Selected song track: ", song.track_id);
                             playPreview(song.track_id);
-                           // Update available songs from the backend response
-                            //
+
+                            randomButton.disabled = false; // Re-enable the button
                         });
 
         });
