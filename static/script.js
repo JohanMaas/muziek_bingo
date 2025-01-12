@@ -391,17 +391,32 @@
 
         });
 
+        // Initialize grid based on the total number of songs
+        function initializeGrid(numSongs) {
+            songGrid.innerHTML = ""; // Clear any existing grid items
+            for (let i = 0; i < numSongs; i++) {
+                const div = document.createElement("div");
+                div.className = "grid-item";
+                songGrid.appendChild(div);
+            }
+        }
+
+        // Call this function after fetching the available songs
+        async function fetchAvailableSongs() {
+            const response = await fetch("/available_songs");
+            const data = await response.json();
+            availableSongs = data;
+            initializeGrid(availableSongs.length); // Initialize grid based on the number of songs
+//            updateSongGrid();
+        }
+
         // Call the function to initialize the placeholder when the app starts
         document.addEventListener("DOMContentLoaded", () => {
 //            initializePlaceholder();
         });
 
-        // Initialize empty grid
-        for (let i = 0; i < 50; i++) {
-            const div = document.createElement("div");
-            div.className = "grid-item";
-            songGrid.appendChild(div);
-        }
+        // Initial call to populate the song grid
+        fetchAvailableSongs();
 
         // Update the carousel with available songs
         updateCarousel();
