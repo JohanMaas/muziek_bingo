@@ -128,8 +128,8 @@ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
         }
 
         .grid-item {
-            background-color: #ebebeb;
-            border: 1px solid #ccc;
+            background-color: #6b768d;
+            border: 2px solid #45454d;
             text-align: center;
             overflow-wrap: break-word;
             padding: 5px;
@@ -142,7 +142,7 @@ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
             width: 100%;
             min-width: 75px;
             min-height: 50px;
-            color: #232323;
+            color: #f6f6f6;
             opacity:0.7;
             transition: all 0.4s ease;
         }
