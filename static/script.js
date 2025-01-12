@@ -4,6 +4,7 @@
         const randomButton = document.getElementById("random-button");
         const resetButton = document.getElementById("reset-button");
         const carouselFrame = document.getElementById("carousel-frame");
+        const rouletteSound = document.getElementById("roulette-sound");
 
         const albumImageCache = {};
         const placeholderCache = {};
@@ -338,7 +339,9 @@
                 });
 
                    let song = availableSongs[selectedIndex]
+                   rouletteSound.play(); // Play the roulette sound effect
                    animateCarousel(1, selectedIndex, () => {
+                            rouletteSound.pause(); // Stop the sound effect
                             // Once animation is complete, show the album cover
                             const albumImageUrl = `/static/albums/${song.image}`;
                             const image = new Image();
