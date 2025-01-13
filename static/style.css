@@ -108,12 +108,19 @@ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
         }
 
         .song-info {
-            place-items: center;
-            font-size: x-large;
-            color: #3c4136;
-            font-family: "Permanent Marker", serif;
-          font-weight: 400;
-          font-style: normal;
+            background-color: #ffffff; /* White background */
+            padding: 20px; /* Add padding */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            text-align: center; /* Center the text */
+            margin-bottom: 20px; /* Add some margin at the bottom */
+        }
+        
+        .song-info h1 {
+            font-size: 2em; /* Increase font size */
+            color: #333; /* Darker text color */
+            margin: 0; /* Remove default margin */
+            font-family: 'Lobster', cursive; /* Change font family */
         }
 
         .grid-container {
