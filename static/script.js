@@ -316,6 +316,9 @@
     
         // Handle random button click
         randomButton.addEventListener("click", async() => {
+            const svgContainer = document.getElementById('bingo-winner-animation');
+            svgContainer.style.display = 'none'; // Hide the SVG animation
+
             let selectedIndex = 0
             randomButton.disabled = true; // Disable the button during the animation
             await updateCarousel();
@@ -439,6 +442,18 @@
                 }
             }
         });             
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'F4') {
+                event.preventDefault(); // Prevent the default action of the F4 key                
+                const svgContainer = document.getElementById('bingo-winner-animation');
+                if (svgContainer.style.display === 'block') {
+                    svgContainer.style.display = 'none';
+                } else {
+                    svgContainer.style.display = 'block';
+                }
+            }
+        });
 
         // Initialize grid based on the total number of songs
         function initializeGrid(numSongs) {

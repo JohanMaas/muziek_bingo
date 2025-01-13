@@ -321,3 +321,41 @@ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
     align-self: center;
     justify-self: center;
 }
+
+#bingo-winner-animation {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pop-out-in 0.6s ease-out;
+    z-index: 1000;
+}
+
+@keyframes pop {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes pop-out-in {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(3); /* Blow up the image */
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(0.7); /* Shrink slightly for bounce effect */
+    }
+    90% {
+        transform: translate(-50%, -50%) scale(1.2); /* Slightly overshoot for bounce effect */
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1); /* Settle back to original size */
+    }
+
+}
