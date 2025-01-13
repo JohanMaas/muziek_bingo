@@ -5,6 +5,8 @@
         const resetButton = document.getElementById("reset-button");
         const carouselFrame = document.getElementById("carousel-frame");
         const rouletteSound = document.getElementById("roulette-sound");
+        const f1keysound = document.getElementById("f1-key-sound");
+        const f2keysound = document.getElementById("f2-key-sound");
 
         const albumImageCache = {};
         const placeholderCache = {};
@@ -393,6 +395,50 @@
         }
 
         });
+
+        // Add event listener for F1 key press to play the sound
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "F1") {
+                event.preventDefault(); // Prevent the default action of the F1 key
+
+                // Stop any currently playing Spotify album MP3
+                if (currentAudio && !currentAudio.paused) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0; // Reset the audio to the beginning
+                }
+
+                if (f1keysound.paused) {
+                    f1keysound.loop = true; // Enable looping
+                    f1keysound.play(); // Play the F1 sound effect
+                } else {
+                    f1keysound.loop = false; // Disable looping
+                    f1keysound.pause(); // Pause the sound effect
+                    f1keysound.currentTime = 0; // Reset the sound to the beginning
+                }
+            }
+        });       
+
+        // Add event listener for F2 key press to play the sound
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "F2") {
+                event.preventDefault(); // Prevent the default action of the F1 key
+
+                // Stop any currently playing Spotify album MP3
+                if (currentAudio && !currentAudio.paused) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0; // Reset the audio to the beginning
+                }
+
+                if (f2keysound.paused) {
+                    f2keysound.loop = true; // Enable looping
+                    f2keysound.play(); // Play the F1 sound effect
+                } else {
+                    f2keysound.loop = false; // Disable looping
+                    f2keysound.pause(); // Pause the sound effect
+                    f2keysound.currentTime = 0; // Reset the sound to the beginning
+                }
+            }
+        });             
 
         // Initialize grid based on the total number of songs
         function initializeGrid(numSongs) {
