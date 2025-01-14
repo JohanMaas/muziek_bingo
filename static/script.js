@@ -118,7 +118,13 @@
             if (animating) return; // Prevent overlapping animations
             animating = true;
 
-            const numWidgets = 15 || availableSongsCache.length; // Fixed number of visible widgets
+            // Calculate the number of widgets based on the screen size
+            const carouselWidth = window.outerWidth;
+            //console.log("carouselWidth: ", carouselFrame.clientWidth); // Debugging
+            const widgetWidth = 170; // Adjust this value based on your widget width
+            const numWidgets = Math.floor(carouselWidth / widgetWidth);
+
+//            const numWidgets = 15 || availableSongsCache.length; // Fixed number of visible widgets
             const middleIndex = Math.floor(numWidgets / 2); // Middle widget index
             const totalSongs = availableSongsCache.length;
 
