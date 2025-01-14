@@ -68,7 +68,7 @@ def album_images(filename):
 
 @app.route("/available_songs")
 def available_songs():
-    available_songs = [song for song in songs if song["title"] not in selected_songs]
+    available_songs = [song for song in songs]
     return jsonify(available_songs)
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@
         const placeholderCache = {};
 
         let availableSongs = [];
+        let totalSongs = [];
         let selectedSong = null;
         let animating = false;  // Prevents multiple simultaneous animations
         let lastSelectedIndex = 0;
@@ -66,6 +67,8 @@
             await fetch("/available_songs")
                 .then((response) => response.json())
                 .then((availableSongs) => {
+                    console.log("Total songs:", availableSongs);  // Debugging
+                    totalSongs = availableSongs;  // Update total songs from the backend response
                     carouselFrame.innerHTML = ""; // Clear any existing content
 
                     // Calculate the number of widgets based on the screen size
@@ -351,6 +354,7 @@
 
                    let song = availableSongs[selectedIndex]
                    rouletteSound.play(); // Play the roulette sound effect
+                   selectedIndex = totalSongs.findIndex(s => s.title === selectedSong.title);
                    animateCarousel(1, selectedIndex, () => {
                             rouletteSound.pause(); // Stop the sound effect
                             // Once animation is complete, show the album cover
