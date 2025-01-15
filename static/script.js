@@ -407,7 +407,7 @@
                         // Reset the UI
                         alert(data.message);
                         albumContainer.innerHTML = `<p></p>`;
-                        songInfo.innerHTML = `<h2>Getrokken nummers:</h2>`;
+                        songInfo.innerHTML = `<h1>Klaar om te starten!</h1>`;
                         resetGrid();
                         // Update the carousel with available songs
                         updateCarousel();
