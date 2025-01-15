@@ -465,12 +465,16 @@
 
         document.addEventListener('keydown', function(event) {
             if (event.key === 'F4') {
-                event.preventDefault(); // Prevent the default action of the F4 key                
+                event.preventDefault(); // Prevent the default action of the F4 key    
+                const drumRollSound = document.getElementById('drum-roll-sound');            
                 const svgContainer = document.getElementById('bingo-winner-animation');
                 if (svgContainer.style.display === 'block') {
                     svgContainer.style.display = 'none';
                 } else {
-                    svgContainer.style.display = 'block';
+                    drumRollSound.play(); // Play the drum roll sound
+                    setTimeout(() => {
+                        svgContainer.style.display = 'block';
+                    }, 6000); // Show the SVG animation after 6 seconds
                 }
             }
         });
