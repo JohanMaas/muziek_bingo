@@ -12,6 +12,7 @@
         const placeholderCache = {};
 
         let availableSongs = [];
+        let remainingSongs = [];
         let totalSongs = [];
         let selectedSong = null;
         let animating = false;  // Prevents multiple simultaneous animations
@@ -186,7 +187,15 @@
                             widget.classList.remove("highlight-green");
                         }
                     } else {
-                        widget.classList.remove("highlight-yellow", "highlight-green");
+                        const isAvailable = remainingSongs.some(s => s.title === song.title);
+                        console.log("Remaining songs: ", remainingSongs); // Debugging
+                        console.log("Song to check: ", song.title); // Debugging
+                        console.log("isAvailable: ", isAvailable); // Debugging
+                        if (!isAvailable) {
+                            widget.classList.add("deselected")
+                        } else {    
+                            widget.classList.remove("highlight-yellow", "highlight-green", "deselected");
+                        }
                     }
                 });
 
@@ -342,6 +351,7 @@
 
                         console.log("Available songs:", data.available_songs);  // Debugging
                         availableSongs = data.available_songs;  // Update available songs from the backend response
+                        remainingSongs = data.available_songs;
                         selectedIndex = availableSongs.findIndex(s => s.title === selectedSong.title);
                         console.log("Selected song:", selectedSong.title);
                         console.log("Selected index:", selectedIndex);
