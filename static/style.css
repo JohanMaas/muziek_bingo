@@ -362,6 +362,7 @@ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
     vertical-align: middle;
     align-self: center;
     justify-self: center;
+    filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.5));
 }
 
 #bingo-winner-animation {
