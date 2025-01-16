@@ -300,17 +300,52 @@
         }
 
         let currentAudio = null; // Keep track of the currently playing audio
+        let fadeOutTimeout = null;
+
+        async function fadeOutCurrentAudio() {
+            if (currentAudio) {
+                if (fadeOutTimeout) {
+                    clearTimeout(fadeOutTimeout); // Clear existing timeout if one exists
+                }
+                // Fade out existing audio
+                const fadeOutTime = 1000; // 2 seconds fade out (adjust as needed)
+                const fadeOutInterval = 10; // Interval for volume reduction
+                const fadeOutSteps = fadeOutTime / fadeOutInterval;
+                let currentVolume = currentAudio.volume;
+                const volumeDecrement = currentVolume / fadeOutSteps;
+        
+                return new Promise(resolve => {  // Return a Promise for better async handling
+        
+                  fadeOutTimeout = setInterval(() => {
+                      currentVolume -= volumeDecrement;
+                      currentAudio.volume = Math.max(0, currentVolume); // Prevent volume going below 0
+        
+                      if (currentAudio.volume <= 0) {
+                          clearInterval(fadeOutTimeout);
+                          currentAudio.pause();
+                          currentAudio.src = ""; // Reset the source
+                          currentAudio = null;
+                          resolve(); // Resolve the Promise when fade out is complete
+                      }
+                  }, fadeOutInterval);
+              });
+            } else {
+                return Promise.resolve(); // If no audio is playing, resolve immediately
+            }
+        }
 
         async function playPreview(trackId) {
             const apiUrl = `http://127.0.0.1:5000/api/spotify-preview/${trackId}`;
             
             try {
                 // Stop the currently playing audio (if any)
-                if (currentAudio) {
+ /*               if (currentAudio) {
                     currentAudio.pause();
                     currentAudio = null; // Clear the reference
-                }
+                }*/
         
+                await fadeOutCurrentAudio(); // Fade out the current audio (if any)
+
                 const response = await fetch(apiUrl);
                 if (!response.ok) {
                     throw new Error(`Failed to fetch preview URL: ${response.statusText}`);
