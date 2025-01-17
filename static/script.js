@@ -189,9 +189,9 @@
                         }
                     } else {
                         const isAvailable = remainingSongs.some(s => s.title === song.title);
-                        console.log("Remaining songs: ", remainingSongs); // Debugging
-                        console.log("Song to check: ", song.title); // Debugging
-                        console.log("isAvailable: ", isAvailable); // Debugging
+                        //console.log("Remaining songs: ", remainingSongs); // Debugging
+                        //console.log("Song to check: ", song.title); // Debugging
+                        //console.log("isAvailable: ", isAvailable); // Debugging
                         if (!isAvailable) {
                             widget.classList.add("deselected")
                         } else {    
@@ -523,7 +523,14 @@
 
         document.addEventListener('keydown', function(event) {
             if (event.key === 'F4') {
-                event.preventDefault(); // Prevent the default action of the F4 key    
+                event.preventDefault(); // Prevent the default action of the F4 key
+                
+                // Stop any currently playing Spotify album MP3
+                if (currentAudio && !currentAudio.paused) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0; // Reset the audio to the beginning
+                }
+
                 const drumRollSound = document.getElementById('drum-roll-sound');            
                 const svgContainer = document.getElementById('bingo-winner-animation');
                 if (svgContainer.style.display === 'block') {
@@ -540,13 +547,22 @@
         document.addEventListener('keydown', function(event) {
             if (event.key === 'F5') {
                 event.preventDefault(); // Prevent the default action of the F4 key    
-                //const drumRollSound = document.getElementById('drum-roll-sound');            
+
+                // Stop any currently playing Spotify album MP3
+                if (currentAudio && !currentAudio.paused) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0; // Reset the audio to the beginning
+                }
+
+                const loserSound = document.getElementById('loser-sound');            
                 const svgContainer = document.getElementById('bingo-loser-animation');
                 if (svgContainer.style.display === 'block') {
                     svgContainer.style.display = 'none';
                 } else {
-                    //drumRollSound.play(); // Play the drum roll sound
-                    svgContainer.style.display = 'block';
+                    loserSound.play(); // Play the drum roll sound
+                    setTimeout(() => {
+                        svgContainer.style.display = 'block';
+                    }, 500); // Show the SVG animation after 6 seconds
                 }
             }
         });
