@@ -537,6 +537,20 @@
             }
         });
 
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'F5') {
+                event.preventDefault(); // Prevent the default action of the F4 key    
+                //const drumRollSound = document.getElementById('drum-roll-sound');            
+                const svgContainer = document.getElementById('bingo-loser-animation');
+                if (svgContainer.style.display === 'block') {
+                    svgContainer.style.display = 'none';
+                } else {
+                    //drumRollSound.play(); // Play the drum roll sound
+                    svgContainer.style.display = 'block';
+                }
+            }
+        });
+
         // Initialize grid based on the total number of songs
         function initializeGrid(numSongs) {
             songGrid.innerHTML = ""; // Clear any existing grid items
