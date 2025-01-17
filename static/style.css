@@ -402,3 +402,22 @@ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
     }
 
 }
+
+#bingo-loser-animation {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the image */
+    animation: grow 0.3s ease-out; 
+    z-index: 1000;
+}
+
+@keyframes grow {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5); /* Start small */
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1); /* Grow to full size */
+    }
+}
