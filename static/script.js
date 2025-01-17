@@ -7,6 +7,7 @@
         const rouletteSound = document.getElementById("roulette-sound");
         const f1keysound = document.getElementById("f1-key-sound");
         const f2keysound = document.getElementById("f2-key-sound");
+        const f3keysound = document.getElementById("f3-key-sound");
 
         const albumImageCache = {};
         const placeholderCache = {};
@@ -494,6 +495,28 @@
                     f2keysound.loop = false; // Disable looping
                     f2keysound.pause(); // Pause the sound effect
                     f2keysound.currentTime = 0; // Reset the sound to the beginning
+                }
+            }
+        });
+        
+        // Add event listener for F3 key press to play the sound
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "F3") {
+                event.preventDefault(); // Prevent the default action of the F1 key
+
+                // Stop any currently playing Spotify album MP3
+                if (currentAudio && !currentAudio.paused) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0; // Reset the audio to the beginning
+                }
+
+                if (f3keysound.paused) {
+                    f3keysound.loop = true; // Enable looping
+                    f3keysound.play(); // Play the F1 sound effect
+                } else {
+                    f3keysound.loop = false; // Disable looping
+                    f3keysound.pause(); // Pause the sound effect
+                    f3keysound.currentTime = 0; // Reset the sound to the beginning
                 }
             }
         });             
