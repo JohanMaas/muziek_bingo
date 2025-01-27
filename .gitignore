@@ -6,3 +6,6 @@
 .cache
 venv/
 get_album_covers.py
+get_song_ids.py
+updated_songs.json
+/static/updated_songs.json

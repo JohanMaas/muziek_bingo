@@ -14,6 +14,7 @@ The app ensures each song is chosen only once and supports dynamic visuals, such
 - Reset functionality to start a new game
 - Responsive web interface
 - Support for placeholder images when album art is missing
+- Bingo card generator with option to stripe off songs online
 
 ## Technical Requirements
 
